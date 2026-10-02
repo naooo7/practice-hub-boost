@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { Screen } from "@/components/app-shell";
+import { Switch } from "@/components/ui/switch";
 import { user } from "@/data/prototype";
 import {
   institutions,
   setAppearance,
   setInstitution,
+  setThemeEnabled,
   usePrefs,
   type Appearance,
 } from "@/lib/institution";
@@ -125,6 +127,21 @@ function ProfileScreen() {
               );
             })}
           </div>
+          {current && (
+            <div className="mt-3 flex items-center justify-between rounded-xl border border-border bg-surface px-3 py-2.5">
+              <div className="min-w-0 flex-1 pr-3">
+                <p className="text-[14px] font-medium">Institution Theme</p>
+                <p className="text-[11px] text-muted-foreground">
+                  Accent follows {current.short}. Your target stays either way.
+                </p>
+              </div>
+              <Switch
+                checked={prefs.themeEnabled}
+                onCheckedChange={setThemeEnabled}
+                aria-label="Institution theme"
+              />
+            </div>
+          )}
           {current && (
             <button
               onClick={() => setInstitution(null)}
