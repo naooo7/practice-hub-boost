@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Bell, ChevronRight, FileText } from "lucide-react";
 import { Screen } from "@/components/app-shell";
-import { Button } from "@/components/ui/button";
-import { findMaterial, todaysFocus, user } from "@/data/prototype";
+import { user } from "@/data/prototype";
 import { dayKey, formatDuration, needsReview, streak, summarize, useActivity } from "@/lib/activity";
 import { useInstitution } from "@/lib/institution";
 
@@ -43,15 +42,6 @@ function Home() {
   const ws = summarize(attempts.filter((a) => weekDays.some((d) => d.key === dayKey(new Date(a.answeredAt)))));
   const maxDayCount = Math.max(...weekDays.map((d) => d.count), 1);
   const days = streak(attempts);
-  const lastSession = data?.sessions.at(-1);
-  const focusMaterial = lastSession
-    ? findMaterial(lastSession.examId, lastSession.subtestId, lastSession.materialId)
-    : undefined;
-  const focus = lastSession && focusMaterial
-    ? { examId: lastSession.examId, subtestId: lastSession.subtestId, materialId: lastSession.materialId, name: focusMaterial.name }
-    : todaysFocus;
-  const qCount = focusMaterial?.questionCount ?? todaysFocus.questions;
-  const qMinutes = focusMaterial?.minutes ?? todaysFocus.minutes;
   const hour = new Date().getHours();
   const greeting = hour < 11 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
@@ -145,28 +135,48 @@ function Home() {
         <ChevronRight className="size-4 text-muted-foreground/70" />
       </Link>
 
-      <section className="relative mt-3.5 overflow-hidden rounded-2xl border border-primary/15 bg-primary-soft/50 p-4 shadow-soft">
+      <Link
+        to="/practice"
+        aria-label="Open Practice hub"
+        className="tap relative mt-3.5 block overflow-hidden rounded-2xl border border-primary/15 bg-primary-soft/50 p-4 shadow-soft"
+      >
         <span aria-hidden="true" className="pointer-events-none absolute -right-12 -top-16 size-44 rotate-12 rounded-[45%] bg-primary/5" />
-        <div className="relative flex items-center gap-3.5">
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-[15px] font-semibold text-primary-foreground">
-            √x
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] text-muted-foreground">{lastSession ? "Continue" : "Suggested start"}</p>
-            <p className="truncate text-[15px] font-medium tracking-[-0.01em]">{focus.name}</p>
-            <p className="tabular text-[12px] text-muted-foreground">{qCount} questions · ~{qMinutes} min</p>
+        {institution ? (
+          institution.logo ? (
+            <img
+              src={institution.logo}
+              alt={`${institution.short} logo`}
+              className="absolute right-3.5 top-3.5 size-10 rounded-full bg-surface object-cover ring-1 ring-border"
+            />
+          ) : (
+            <span
+              aria-hidden="true"
+              className="absolute right-3.5 top-3.5 flex size-10 items-center justify-center rounded-full text-[14px] font-semibold text-primary-foreground ring-1 ring-border"
+              style={{ background: institution.swatch }}
+            >
+              {institution.short.charAt(0)}
+            </span>
+          )
+        ) : null}
+        <div className="relative pr-14">
+          <p className="text-[17px] font-semibold tracking-[-0.015em]">Mau belajar apa hari ini?</p>
+          <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
+            Ayo push latihan soal hari ini.
+          </p>
+          <div className="mt-3.5 flex items-center justify-between gap-2">
+            <p className="text-[12px] font-medium text-muted-foreground">
+              {institution ? (
+                <>
+                  Target: <span className="font-semibold text-foreground/80">{institution.short}</span>
+                </>
+              ) : (
+                "Pilih cara latihanmu di Practice"
+              )}
+            </p>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
           </div>
-          <ChevronRight className="size-4 text-muted-foreground" />
         </div>
-        <Button asChild size="block" className="relative mt-3.5">
-          <Link
-            to="/practice/mode/$mode"
-            params={{ mode: "drill" }}
-          >
-            {lastSession ? "Continue" : "Start"} <ChevronRight className="size-4" />
-          </Link>
-        </Button>
-      </section>
+      </Link>
     </Screen>
   );
 }
